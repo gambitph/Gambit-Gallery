@@ -1,0 +1,19 @@
+{
+    "name": "gambitph/gambit-gallery",
+    "description": "Gambit Gallery extends WordPress' image gallery feature with new options that allow you to create beautiful image galleries.",
+    "keywords": ["wordpress", "image gallery", "gallery", "Gambit Gallery"],
+    "homepage" : "https://github.com/gambitph/Gambit-Gallery",
+    "license": "GPLv2+",
+    "authors": [
+        {
+            "name": "Gambit Technologies",
+            "email" : "info@gambit.ph",
+            "homepage" : "http://www.gambitgallery.com/",
+            "role" : "Developer"
+        }
+    ],
+    "type": "gallery",
+    "autoload": {
+        "files": ["gambit-gallery.php"]
+    }
+}
