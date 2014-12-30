@@ -48,6 +48,10 @@ class GambitGalleryPlugin {
 		
 		// Style our gallery settings
 		add_action( 'admin_enqueue_scripts', array( $this, "loadAdminScripts" ) );
+
+		// Enable / disable Gambit Gallery setting
+		add_action( 'gg_settings_create', array( $this, 'createSettings' ), -100 );
+		add_filter( 'gg_settings_attrib_defaults', array( $this, 'attributeDefaults' ), -100 );
 	}
 
 
@@ -168,11 +172,55 @@ class GambitGalleryPlugin {
 	 * @since	0.1-alpha
 	 */
 	public function renderGalleryOutput( $output, $atts ) {
+		
+		// Check whether to apply gambit gallery stuff
+		if ( empty( $atts['gambit_gallery'] ) ) {
+			return $output;
+		}
+		if ( strtolower( $atts['gambit_gallery'] ) !== 'enabled' ) {
+			return $output;
+		}
+		
 		$atts = apply_filters( 'gg_gallery_attributes', $atts );
 		
 		$output = apply_filters( 'gg_gallery_render', $output, $atts );
 		
 		return apply_filters( 'gg_gallery_output', $output );
+	}
+
+	
+	/**
+	 * Overrides the default gallery shortcode output
+	 *
+	 * @access	public
+	 * @param	$atts array The list of gallery attributes
+	 * @return	string The default values of the attributes
+	 * @since	0.1-alpha
+	 */
+	public function attributeDefaults( $atts ) {
+		return array_merge( $atts, array(
+			'gambit_gallery' => 'disabled',
+		) );
+	}
+
+	
+	/**
+	 * Create the disable / enable Gambit Gallery setting
+	 *
+	 * @access	public
+	 * @return	void
+	 * @since	0.1-alpha
+	 */
+	public function createSettings() {
+		?>
+		<label class="setting <?php echo GG_SLUG ?>">
+			<span><?php _e( 'Gambit Gallery', GG_I18NDOMAIN ); ?></span>
+			<select data-setting="gambit_gallery">
+				<option value='disabled'><?php _e( 'Disabled', GG_I18NDOMAIN ) ?></option>
+				<option value='enabled'><?php _e( 'Enabled', GG_I18NDOMAIN ) ?></option>
+			</select>
+		</label>
+		<?php
 	}
 }
 
