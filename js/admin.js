@@ -2,15 +2,11 @@ jQuery(document).ready(function($) {
 	"use strict";
 	
 	
-	// Trigger stuff on change
-	var modalIsVisible = false;
+	// Trigger stuff when the modal is visible
 	setInterval( function() {
 		$ = jQuery;
-		if ( modalIsVisible !== $('.media-modal').is(':visible') ) {
-			if ( ! modalIsVisible ) {
-				$('.setting.gambit-gallery').find('select, input').trigger('change');
-			}
-			modalIsVisible = $('.media-modal').is(':visible');
+		if ( $('.media-modal').is(':visible') && $('.gallery-settings').length ) {
+			$('[data-setting="gambit_gallery"]').trigger('change');
 		}
 	}, 500 );
 	
@@ -19,11 +15,13 @@ jQuery(document).ready(function($) {
 	// Show gambit gallery settings if enabled
 	$('body').on('change', '[data-setting="gambit_gallery"]', function() {
 		if ( $(this).val() === 'enabled' ) {
-			$('.gallery-settings .setting.size').css('opacity', '.5');
-			$('.setting.gambit-gallery').filter(':not(:eq(0))').show();
+			$('.gallery-settings [data-setting="link"]').css('opacity', '.4');
+			$('.gallery-settings [data-setting="size"]').css('opacity', '.4');
+			$('.gallery-settings .setting.gambit-gallery').filter(':not(:eq(0)):not(:visible)').show();
 		} else {
-			$('.gallery-settings .setting.size').css('opacity', '1');
-			$('.setting.gambit-gallery').filter(':not(:eq(0))').hide();
+			$('.gallery-settings [data-setting="link"]').css('opacity', '1');
+			$('.gallery-settings [data-setting="size"]').css('opacity', '1');
+			$('.gallery-settings .setting.gambit-gallery').filter(':not(:eq(0)):visible').hide();
 		}
 	});
 });
