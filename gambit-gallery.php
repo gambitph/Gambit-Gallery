@@ -15,12 +15,13 @@ defined( 'GG_VERSION' ) or define( 'GG_VERSION', '0.1-alpha' );
 // Used for text domains
 defined( 'GG_I18NDOMAIN' ) or define( 'GG_I18NDOMAIN', 'gambit-gallery' );
 // Used for general naming, e.g. nonces
-defined( 'GG' ) or define( 'GG', 'gambit-gallery' );
+defined( 'GG_SLUG' ) or define( 'GG_SLUG', 'gambit-gallery' );
 // Used for general naming
 defined( 'GG_NAME' ) or define( 'GG_NAME', 'Gambit Gallery' );
 // Used for file includes
 defined( 'GG_PATH' ) or define( 'GG_PATH', trailingslashit( dirname( __FILE__ ) ) );
 
+require_once( GG_PATH . 'class-gg-core.php' );
 
 /**
  * Gambit Gallery Plugin Class
@@ -38,6 +39,15 @@ class GambitGalleryPlugin {
 	function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'loadTextDomain' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'pluginLinks' ), 10, 2 );
+		
+		// Override default gallery shortcode output
+		add_filter( 'post_gallery', array( $this, 'renderGalleryOutput'), 10, 2 );
+		
+		// Adds our own gallery settings
+		add_action( 'print_media_templates', array( $this, 'renderGallerySettings' ) );
+		
+		// Style our gallery settings
+		add_action( 'admin_enqueue_scripts', array( $this, "loadAdminScripts" ) );
 	}
 
 
@@ -57,8 +67,8 @@ class GambitGalleryPlugin {
 	 * Adds links to the docs and GitHub
 	 *
 	 * @access	public
-	 * @param	array $plugin_meta The current array of links
-	 * @param	string $plugin_file The plugin file
+	 * @param	$plugin_meta array The current array of links
+	 * @param	$plugin_file array The plugin file
 	 * @return	array The current array of links together with our additions
 	 * @since	0.1-alpha
 	 **/
@@ -78,6 +88,91 @@ class GambitGalleryPlugin {
 			);
 		}
 		return $plugin_meta;
+	}
+	
+	
+	/**
+	 * Loads the admin styles for our settings
+	 *
+	 * @access	public
+	 * @return	void
+	 * @since	0.1-alpha
+	 */
+	public function loadAdminScripts() {
+		wp_enqueue_style( 
+			GG_SLUG . '-admin', 
+			plugins_url( 'css/admin.css', __FILE__ ), 
+			array(), 
+			GG_VERSION
+		);
+	}
+	
+	
+	/**
+	 * Renders the Gambit Gallery settings after the normal gallery settings
+	 *
+	 * @access	public
+	 * @return	void
+	 * @since	0.1-alpha
+	 */
+	public function renderGallerySettings() {
+		
+		// Associative array of attributes and their default values
+		$attributeDefaults = apply_filters( 'gg_settings_attrib_defaults', array() );
+		
+	    // define your backbone template;
+	    // the "tmpl-" prefix is required,
+	    // and your input field should have a data-setting attribute
+	    // matching the shortcode name
+	    ?>
+		
+		<script type="text/html" id="tmpl-<?php echo GG_SLUG ?>-settings">
+			<h3 class="gg_heading">
+				<?php _e( 'Gambit Gallery Settings', GG_I18NDOMAIN ) ?>
+			</h3>
+			<?php do_action( 'gg_settings_create' ) ?>
+		</script>
+
+	    <script>
+
+	      jQuery(document).ready(function(){
+
+	        // add your shortcode attribute and its default value to the
+	        // gallery settings list; $.extend should work as well...
+	        _.extend(wp.media.gallery.defaults, 
+				<?php echo json_encode( $attributeDefaults ) ?>
+			);
+
+	        // merge default gallery settings template with yours
+	        wp.media.view.Settings.Gallery = wp.media.view.Settings.Gallery.extend({
+	          template: function(view){
+	            return wp.media.template('gallery-settings')(view)
+	                 + wp.media.template('<?php echo GG_SLUG ?>-settings')(view);
+	          }
+	        });
+
+	      });
+
+	    </script>
+	    <?php
+	}
+	
+	
+	/**
+	 * Overrides the default gallery shortcode output
+	 *
+	 * @access	public
+	 * @param	$output string The current rendered shortcode (empty string)
+	 * @param	$atts array The list of gallery attributes
+	 * @return	string The new gallery shortcode output
+	 * @since	0.1-alpha
+	 */
+	public function renderGalleryOutput( $output, $atts ) {
+		$atts = apply_filters( 'gg_gallery_attributes', $atts );
+		
+		$output = apply_filters( 'gg_gallery_render', $output, $atts );
+		
+		return apply_filters( 'gg_gallery_output', $output );
 	}
 }
 
