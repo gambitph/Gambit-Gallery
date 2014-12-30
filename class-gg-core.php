@@ -99,8 +99,6 @@ class GGCore {
 	
 	public function renderGallery( $output, $atts ) {
 		
-		if ( $this)
-		
 		/**
 		 * Get the attachments that we will display
 		 */

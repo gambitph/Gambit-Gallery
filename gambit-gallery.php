@@ -109,6 +109,13 @@ class GambitGalleryPlugin {
 			array(), 
 			GG_VERSION
 		);
+		
+		wp_enqueue_script( 
+			GG_SLUG . '-admin', 
+			plugins_url( 'js/admin.js', __FILE__ ), 
+			array( 'jquery' ), 
+			GG_VERSION
+		);
 	}
 	
 	
@@ -138,25 +145,23 @@ class GambitGalleryPlugin {
 		</script>
 
 	    <script>
+			jQuery(document).ready(function($){
 
-	      jQuery(document).ready(function(){
+				// add your shortcode attribute and its default value to the
+				// gallery settings list; $.extend should work as well...
+				_.extend(wp.media.gallery.defaults, 
+					<?php echo json_encode( $attributeDefaults ) ?>
+				);
 
-	        // add your shortcode attribute and its default value to the
-	        // gallery settings list; $.extend should work as well...
-	        _.extend(wp.media.gallery.defaults, 
-				<?php echo json_encode( $attributeDefaults ) ?>
-			);
+				// merge default gallery settings template with yours
+				wp.media.view.Settings.Gallery = wp.media.view.Settings.Gallery.extend({
+					template: function(view){
+						return wp.media.template('gallery-settings')(view)
+						+ wp.media.template('<?php echo GG_SLUG ?>-settings')(view);
+					}
+				});
 
-	        // merge default gallery settings template with yours
-	        wp.media.view.Settings.Gallery = wp.media.view.Settings.Gallery.extend({
-	          template: function(view){
-	            return wp.media.template('gallery-settings')(view)
-	                 + wp.media.template('<?php echo GG_SLUG ?>-settings')(view);
-	          }
-	        });
-
-	      });
-
+			});
 	    </script>
 	    <?php
 	}
